@@ -33,11 +33,11 @@ jobs:
       with:
         arguments: build
         
-    - uses: mr-smithers-excellent/docker-build-push@v6
-      name: Build & push Docker image
+    - name: Build & push Docker image
+      uses: mr-smithers-excellent/docker-build-push@v6      
       with:
         image: wildcat7849/github_actions
-        tags: v1, latest
+        registry: docker.io
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
