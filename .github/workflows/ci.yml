@@ -37,9 +37,9 @@ jobs:
     - name: Push Docker Image
       run: |
         docker push wildcat7849/demo-app
-      # working-directory: ${{ github.workspace }}
+      working-directory: ${{ github.workspace }}
     
     - name: Cleanup
       run: |
         docker rmi wildcat7849/demo-app
-      #working-directory: ${{ github.workspace }}
+      working-directory: ${{ github.workspace }}
