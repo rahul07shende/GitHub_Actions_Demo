@@ -1,43 +1,45 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
-
 name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [new-ci-workflow]
   pull_request:
-    branches: [ "main" ]
-
-permissions:
-  contents: read
+    branches: [new-ci-workflow]
 
 jobs:
-  build:
+  build-and-deploy:
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up JDK 11
-      uses: actions/setup-java@v3
-      with:
-        java-version: '8'
-        distribution: 'temurin'
-    - name: Build with Gradle
-      uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
-      with:
-        arguments: build
-        
-    - name: Build & push Docker image
-      uses: mr-smithers-excellent/docker-build-push@v6      
-      with:
-        image: wildcat7849/demo-app
-        registry: docker.io
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Checkout code
+      uses: actions/checkout@v2
 
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Build Docker Image
+      run: |
+        docker build -t wildcat7849/demo-app .
+      working-directory: ${{ github.workspace }}
+
+    - name: Login to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: Push Docker Image
+      run: |
+        docker push wildcat7849/demo-app
+      # working-directory: ${{ github.workspace }}
+    
+    - name: Cleanup
+      run: |
+        docker rmi wildcat7849/demo-app
+      #working-directory: ${{ github.workspace }}
